@@ -1,16 +1,8 @@
-# doc2vec-sample
-1. zipを解凍し、中身を`doc2vec-sample/aozora/青空文庫/`内に入れる
-2. 学習  
-`./doc2vec.py`
-
-* 文章で検索  
-`./doc2vec_search.py`
-
-* 作者・作品で検索  
-`./doc2vec_search2.py`
-
-### 注意
-* zipの解凍・モデルの学習のため約2GBの空き容量が必要です。
-
+# tweet-detect-doc2vec
+こちらをForkした[Foo-x/doc2vec-sample](https://github.com/Foo-x/doc2vec-sample)
+変更点
+- tweet取得のjsスクリプト追加
+- 上記スクリプトがはくデータセット様に学習用のPythonスクリプトを変更した
+- 類似度 -1.0~1.0を表示するようにした
 ### License
 MIT

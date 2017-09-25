@@ -12,7 +12,7 @@ def search_similar_texts(words):
     x = model.infer_vector(words)
     most_similar_texts = model.docvecs.most_similar([x])
     for similar_text in most_similar_texts:
-        print(similar_text[0])
+        print(similar_text[0],similar_text[1])
 
 # 似た単語を探す
 def search_similar_words(words):

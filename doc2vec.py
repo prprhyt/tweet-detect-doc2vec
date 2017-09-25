@@ -7,6 +7,7 @@ import MeCab
 import collections
 from gensim import models
 from gensim.models.doc2vec import LabeledSentence
+import json
 
 INPUT_DOC_DIR = './aozora/'
 OUTPUT_MODEL = 'doc2vec.model'
@@ -46,7 +47,7 @@ def trim_doc(doc):
     return ''.join(valid_lines)
 
 # 文章から単語に分解して返す
-def split_into_words(doc, name=''):
+def split_into_words(doc):
     mecab = MeCab.Tagger("-Ochasen")
     valid_doc = trim_doc(doc)
     lines = mecab.parse(doc).splitlines()
@@ -55,14 +56,14 @@ def split_into_words(doc, name=''):
         chunks = line.split('\t')
         if len(chunks) > 3 and (chunks[3].startswith('動詞') or chunks[3].startswith('形容詞') or (chunks[3].startswith('名詞') and not chunks[3].startswith('名詞-数'))):
             words.append(chunks[0])
-    return LabeledSentence(words=words, tags=[name])
+    return LabeledSentence(words=words, tags=["tweet"])
 
 # ファイルから単語のリストを取得
-def corpus_to_sentences(corpus):
-    docs = [read_document(x) for x in corpus]
-    for idx, (doc, name) in enumerate(zip(docs, corpus)):
-        sys.stdout.write('\r前処理中 {} / {}'.format(idx, len(corpus)))
-        yield split_into_words(doc, name)
+def corpus_to_sentences(words_list):
+    #docs = [read_document(x) for x in corpus]
+    for idx, doc in enumerate(words_list):
+        sys.stdout.write('\r前処理中 {} / {}'.format(idx, len(words_list)))
+        yield split_into_words(doc)
 
 # 学習
 def train(sentences):
@@ -70,7 +71,7 @@ def train(sentences):
     model.build_vocab(sentences)
     for x in range(30):
         print(x)
-        model.train(sentences)
+        model.train(sentences, total_examples=model.corpus_count, epochs=model.iter)
         ranks = []
         for doc_id in range(100):
             inferred_vector = model.infer_vector(sentences[doc_id].words)
@@ -83,8 +84,15 @@ def train(sentences):
     return model
 
 if __name__ == '__main__':
-    corpus = list(get_all_files(INPUT_DOC_DIR))
-    sentences = list(corpus_to_sentences(corpus))
+    f = open("tweet_data.json","r")
+    json_str = f.read()
+    f.close()
+    json_obj = json.loads(json_str)
+    words_list = []
+    for json_obj_c in json_obj:
+        words_list.extend(list(json_obj_c.values()))
+    #corpus = #list(get_all_files(INPUT_DOC_DIR))
+    sentences = list(corpus_to_sentences(words_list))
     print()
     model = train(sentences)
     model.save(OUTPUT_MODEL)
